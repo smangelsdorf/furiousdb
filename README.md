@@ -10,6 +10,9 @@ Don't use this in production, or anywhere really.
 
 FuriousDB is currently in the very early stages of development.
 
+I'm recording information about the development process in the
+[wiki](https://github.com/smangelsdorf/furiousdb/wiki).
+
 ## License
 
 MIT license. See [LICENSE](./LICENSE)
