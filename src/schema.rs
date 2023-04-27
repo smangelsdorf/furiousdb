@@ -7,6 +7,13 @@ pub struct TableSchema {
     pub columns: Vec<ColumnSchema>,
 }
 
+impl TableSchema {
+    pub fn read<R: std::io::Read>(reader: R) -> Result<Self, Box<dyn std::error::Error>> {
+        let table_schema = serde_json::from_reader(reader)?;
+        Ok(table_schema)
+    }
+}
+
 /// Describes a column in a table.
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct ColumnSchema {
@@ -47,10 +54,23 @@ pub struct ForeignKey {
 
 #[cfg(test)]
 mod tests {
+    use std::io::Write;
+
     use super::*;
     #[test]
     fn test_parse_table_schema() {
         let table_schema: TableSchema = serde_json::from_str(SAMPLE).unwrap();
+
+        assert_eq!(table_schema.table_name, "employees");
+        assert_eq!(table_schema.columns.len(), 5);
+    }
+
+    #[test]
+    fn test_read() -> Result<(), Box<dyn std::error::Error>> {
+        let mut temp_file = tempfile::NamedTempFile::new()?;
+        write!(temp_file, "{}", SAMPLE)?;
+
+        let table_schema = TableSchema::read(temp_file)?;
 
         assert_eq!(table_schema.table_name, "employees");
         assert_eq!(table_schema.columns.len(), 5);
@@ -137,6 +157,8 @@ mod tests {
                 }
             }
         );
+
+        Ok(())
     }
 
     const SAMPLE: &str = r#"
