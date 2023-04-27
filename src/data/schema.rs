@@ -8,7 +8,7 @@ pub struct TableSchema {
 }
 
 impl TableSchema {
-    pub fn read<R: std::io::Read>(reader: R) -> Result<Self, Box<dyn std::error::Error>> {
+    fn read<R: std::io::Read>(reader: R) -> Result<Self, Box<dyn std::error::Error>> {
         let table_schema = serde_json::from_reader(reader)?;
         Ok(table_schema)
     }
@@ -54,9 +54,9 @@ pub struct ForeignKey {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use std::io::Write;
 
-    use super::*;
     #[test]
     fn test_parse_table_schema() {
         let table_schema: TableSchema = serde_json::from_str(SAMPLE).unwrap();
@@ -68,9 +68,9 @@ mod tests {
     #[test]
     fn test_read() -> Result<(), Box<dyn std::error::Error>> {
         let mut temp_file = tempfile::NamedTempFile::new()?;
-        write!(temp_file, "{}", SAMPLE)?;
+        writeln!(temp_file, "{}", SAMPLE)?;
 
-        let table_schema = TableSchema::read(temp_file)?;
+        let table_schema = TableSchema::read(temp_file.reopen()?)?;
 
         assert_eq!(table_schema.table_name, "employees");
         assert_eq!(table_schema.columns.len(), 5);
